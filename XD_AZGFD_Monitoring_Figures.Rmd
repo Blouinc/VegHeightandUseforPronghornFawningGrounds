@@ -1,0 +1,118 @@
+---
+title: "XD AZGFD Pasture Figures"
+author: "Carter Blouin"
+date: "2023-06-22"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(readr)
+library(googlesheets4)
+library(data.table)
+library(sjPlot)
+library(report)
+```
+
+### Enter the year you're interested in working on
+
+```{r, echo=FALSE}
+year <- '2023' 
+```
+
+```{r, include=FALSE}
+pathUse <- paste(dirname(path.expand('~')),"/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Utilization/", sep="")
+pathRP <- paste(dirname(path.expand('~')),"/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Structure/", sep="")
+```
+
+```{r, include=FALSE}
+Production <- read.csv("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Production/2022/2022PastureProduction.csv")
+```
+
+```{r, include=FALSE}
+ggplot(Production,aes(x=Pasture,y=Production_lbs.ac)) +
+  geom_bar(stat='identity',fill='steelblue', width=0.6) +
+  geom_text(aes(label=Production_lbs.ac), vjust=-.3, color="black", size=4.5)
+```
+
+```{r, include=FALSE}
+Utilization_22 <- readxl::read_excel("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Utilization/Utilization2022.xlsx")
+Utilization_23 <- readxl::read_excel("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Utilization/Utilization2023.xlsx")
+```
+
+```{r, include=FALSE}
+ggplot(Utilization_22,aes(x=Pasture,y=Average,fill=Transect)) +
+  geom_bar(stat='identity',position=position_dodge()) +
+  geom_text(aes(label=Average), vjust=-.5, color="black", 
+            position = position_dodge(0.9), size=3.5) +
+  ylim(0, 30) +
+  scale_fill_brewer(palette="Paired")
+```
+
+```{r, include=FALSE}
+ggplot(Utilization_23,aes(x=Pasture,y=Average,fill=Transect)) +
+  geom_bar(stat='identity',position=position_dodge()) +
+  geom_text(aes(label=Average), vjust=-.5, color="black", 
+            position = position_dodge(0.9), size=3.5) +
+  ylim(0, 30) +
+  scale_fill_brewer(palette="Paired")
+```
+
+```{r, include=FALSE}
+Structure_22 <- read.csv("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Structure/RP_2022.csv")
+Structure_23 <- read.csv("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Structure/RP_2023.csv")
+Structure_Diff <- readxl::read_excel("C:/Users/bloui/XDiamond/AZGFD Pastures/RP_2022to2023Differences.xlsx", sheet="2")
+SummarizedData <- readxl::read_excel("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/AZGFD_LandSwap_Data_Final.xlsx", sheet="2")
+```
+
+```{r, include=FALSE}
+ggplot(Structure_22,aes(x=Pasture,y=Measurement,fill=Site)) +
+  geom_bar(stat='identity',position=position_dodge()) +
+  geom_text(aes(label=Measurement), vjust=-.5, color="black", 
+            position = position_dodge(0.9), size=3.5) +
+  ylim(0, 30) +
+  scale_fill_brewer(palette="Paired")
+```
+
+```{r, include=FALSE}
+ggplot(Structure_23,aes(x=Pasture,y=Measurement,fill=Site)) +
+  geom_bar(stat='identity',position=position_dodge()) +
+  geom_text(aes(label=Measurement), vjust=-.5, color="black", 
+            position = position_dodge(0.9), size=3.5) +
+  ylim(0, 30) +
+  scale_fill_brewer(palette="Paired")
+```
+
+```{r, include=FALSE}
+ggplot(Structure_Diff,aes(x=Pasture,y=Difference,fill=Site)) +
+  geom_bar(stat='identity',position=position_dodge()) +
+  geom_text(aes(label=Difference), vjust=-.5, color="black", 
+            position = position_dodge(0.9), size=3.5) +
+  ylim(0, 30) +
+  scale_fill_brewer(palette="Paired")
+```
+
+```{r, include=FALSE}
+ggplot(SummarizedData %>% mutate(Structure_Ratio=`Difference of Vegetation Height`/`Starting Vegetation Height`), aes(x=Use,y=Structure_Ratio)) +
+  geom_point(size=2, shape=21)+
+  geom_smooth(method=lm) 
+
+mus<-lm(data = SummarizedData, `Difference of Vegetation Height`~ Use +`Starting Vegetation Height`)
+summary(mus)
+plot_model(mus,"eff",terms = c("Use")) +
+  ggtitle("Predicted Difference of Vegetation Height Related to Utilization Levels") +
+  xlab("Use (%)") + ylab("Height Difference (in)") +
+    theme(plot.title = element_text(hjust = 0.5))
+ggsave("C:/Users/bloui/Box/1.Ruyle_lab/1.Project_Data/XDiamond/AZGFD_LandSwap/Results/Figures/Structure_Uselm.png", width = 10, height = 6)
+
+report(mus)
+```
+
+```{r}
+
+```
+
